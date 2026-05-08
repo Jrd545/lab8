@@ -16,6 +16,7 @@ import { API_BASE_URL } from '@env'
 export default function RestaurantsScreen({ navigation, route }) {
   const [restaurants, setRestaurants] = useState([])
   const { loggedInUser } = useContext(AuthorizationContext)
+  const [restaurantToBeDeleted, setRestaurantToBeDeleted] = useState(null)
 
   useEffect(() => {
     if (loggedInUser) {
@@ -51,6 +52,51 @@ export default function RestaurantsScreen({ navigation, route }) {
             {item.shippingCosts.toFixed(2)}€
           </TextSemiBold>
         </TextSemiBold>
+        <Pressable
+          onPress={() =>
+            navigation.navigate('EditRestaurantScreen', { id: item.id })
+          }
+          style={({ pressed }) => [
+            {
+              backgroundColor: pressed
+                ? GlobalStyles.brandBlueTap
+                : GlobalStyles.brandBlue
+            },
+            styles.actionButton
+          ]}
+        >
+          <View
+            style={[
+              { flex: 1, flexDirection: 'row', justifyContent: 'center' }
+            ]}
+          >
+            <MaterialCommunityIcons name="pencil" color={'white'} size={10} />
+            <TextRegular textStyle={styles.text}>Edit</TextRegular>
+          </View>
+        </Pressable>
+
+        <Pressable
+          onPress={() => {
+            setRestaurantToBeDeleted(item)
+          }}
+          style={({ pressed }) => [
+            {
+              backgroundColor: pressed
+                ? GlobalStyles.brandPrimaryTap
+                : GlobalStyles.brandPrimary
+            },
+            styles.actionButton
+          ]}
+        >
+          <View
+            style={[
+              { flex: 1, flexDirection: 'row', justifyContent: 'center' }
+            ]}
+          >
+            <MaterialCommunityIcons name="delete" color={'white'} size={10} />
+            <TextRegular textStyle={styles.text}>Delete</TextRegular>
+          </View>
+        </Pressable>
         <View style={styles.actionButtonsContainer}>
           {/* Include pressable elements for edit and remove this line including brackets */}
         </View>
@@ -114,6 +160,28 @@ export default function RestaurantsScreen({ navigation, route }) {
     }
   }
 
+  const removeRestaurant = async restaurant => {
+    try {
+      await remove(restaurant.id)
+      await fetchRestaurants()
+      setRestaurantToBeDeleted(null)
+      showMessage({
+        message: `Restaurant ${restaurant.name} successfully removed`,
+        type: 'success',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    } catch (error) {
+      console.log(error)
+      setRestaurantToBeDeleted(null)
+      showMessage({
+        message: `Restaurant ${restaurant.name} could not be removed.`,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
 
   return (
     <>
@@ -125,7 +193,18 @@ export default function RestaurantsScreen({ navigation, route }) {
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmptyRestaurantsList}
       />
-
+      <DeleteModal
+        isVisible={restaurantToBeDeleted !== null}
+        onCancel={() => setRestaurantToBeDeleted(null)}
+        onConfirm={() => removeRestaurant(restaurantToBeDeleted)}
+      >
+        <TextRegular>
+          The products of this restaurant will be deleted as well
+        </TextRegular>
+        <TextRegular>
+          If the restaurant has orders, it cannot be deleted.
+        </TextRegular>
+      </DeleteModal>
     </>
   )
 }
@@ -145,7 +224,7 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     borderRadius: 8,
-    height: 40,
+    height: 10,
     marginTop: 12,
     margin: '1%',
     padding: 10,

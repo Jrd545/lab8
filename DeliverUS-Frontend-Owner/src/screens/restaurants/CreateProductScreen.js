@@ -12,12 +12,12 @@ import * as yup from 'yup'
 import { ErrorMessage, Formik } from 'formik'
 import TextError from '../../components/TextError'
 import ImagePicker from '../../components/ImagePicker'
- 
+
 export default function CreateProductScreen({ navigation, route }) {
   const [open, setOpen] = useState(false)
   const [productCategories, setProductCategories] = useState([])
   const [backendErrors, setBackendErrors] = useState()
- 
+
   const initialProductValues = {
     name: null,
     description: null,
@@ -45,7 +45,7 @@ export default function CreateProductScreen({ navigation, route }) {
       .integer()
       .required('Product category is required')
   })
- 
+
   useEffect(() => {
     async function fetchProductCategories() {
       try {
@@ -70,7 +70,7 @@ export default function CreateProductScreen({ navigation, route }) {
     }
     fetchProductCategories()
   }, [])
- 
+
   const createProduct = async values => {
     setBackendErrors([])
     try {
@@ -104,7 +104,7 @@ export default function CreateProductScreen({ navigation, route }) {
               <InputItem name="description" label="Description:" />
               <InputItem name="price" label="Price:" />
               <InputItem name="order" label="Order/position to be rendered:" />
- 
+
               <DropDownPicker
                 open={open}
                 value={values.productCategoryId}
@@ -123,7 +123,7 @@ export default function CreateProductScreen({ navigation, route }) {
                 name={'productCategoryId'}
                 render={msg => <TextError>{msg}</TextError>}
               />
- 
+
               <TextRegular>Is it available?</TextRegular>
               <Switch
                 trackColor={{
@@ -142,21 +142,21 @@ export default function CreateProductScreen({ navigation, route }) {
                 name={'availability'}
                 render={msg => <TextError>{msg}</TextError>}
               />
- 
+
               <ImagePicker
                 label="Image:"
                 image={values.image}
                 defaultImage={defaultProductImage}
                 onImagePicked={result => setFieldValue('image', result)}
               />
- 
+
               {backendErrors &&
                 backendErrors.map((error, index) => (
                   <TextError key={index}>
                     {error.param}-{error.msg}
                   </TextError>
                 ))}
- 
+
               <Pressable
                 onPress={handleSubmit}
                 style={({ pressed }) => [
@@ -188,7 +188,7 @@ export default function CreateProductScreen({ navigation, route }) {
     </Formik>
   )
 }
- 
+
 const styles = StyleSheet.create({
   button: {
     borderRadius: 8,
@@ -221,4 +221,3 @@ const styles = StyleSheet.create({
     marginTop: 5
   }
 })
- 
